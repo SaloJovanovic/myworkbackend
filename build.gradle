@@ -11,13 +11,13 @@ java {
 	sourceCompatibility = '17'
 }
 
-jar {
-	manifest {
-		attributes(
-				'Main-Class': 'src.main.java.com.example.myworkbackend'
-		)
-	}
-}
+//jar {
+//	manifest {
+//		attributes(
+//				'Main-Class': 'src.main.java.com.example.myworkbackend'
+//		)
+//	}
+//}
 
 configurations {
 	compileOnly {

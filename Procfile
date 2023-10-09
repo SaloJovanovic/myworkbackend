@@ -1,1 +1,1 @@
-web: java -jar build/libs/com.example.myworkbackend-0.0.1-SNAPSHOT.jar
+eb: java $JAVA_OPTS -cp target/classes:target/dependency/* com.example.myworkbackend
