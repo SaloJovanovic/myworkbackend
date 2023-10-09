@@ -1,7 +1,7 @@
-package com.example.mywork.controlers;
+package com.example.myworkbackend.controlers;
 
-import com.example.mywork.models.Day;
-import com.example.mywork.services.DayService;
+import com.example.myworkbackend.models.Day;
+import com.example.myworkbackend.services.DayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpMethod;

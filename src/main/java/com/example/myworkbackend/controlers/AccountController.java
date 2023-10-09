@@ -1,8 +1,8 @@
-package com.example.mywork.controlers;
+package com.example.myworkbackend.controlers;
 
-import com.example.mywork.models.Account;
-import com.example.mywork.models.AccountLogInCred;
-import com.example.mywork.services.AccountService;
+import com.example.myworkbackend.models.Account;
+import com.example.myworkbackend.models.AccountLogInCred;
+import com.example.myworkbackend.services.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;

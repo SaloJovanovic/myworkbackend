@@ -1,8 +1,8 @@
-package com.example.mywork.services;
+package com.example.myworkbackend.services;
 
-import com.example.mywork.models.Account;
-import com.example.mywork.models.AccountLogInCred;
-import com.example.mywork.repositories.AccountRepository;
+import com.example.myworkbackend.models.Account;
+import com.example.myworkbackend.models.AccountLogInCred;
+import com.example.myworkbackend.repositories.AccountRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;

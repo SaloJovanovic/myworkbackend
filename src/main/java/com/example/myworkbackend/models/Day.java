@@ -1,4 +1,4 @@
-package com.example.mywork.models;
+package com.example.myworkbackend.models;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,6 +1,6 @@
-package com.example.mywork.repositories;
+package com.example.myworkbackend.repositories;
 
-import com.example.mywork.models.Account;
+import com.example.myworkbackend.models.Account;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.example.mywork.config;
+package com.example.myworkbackend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

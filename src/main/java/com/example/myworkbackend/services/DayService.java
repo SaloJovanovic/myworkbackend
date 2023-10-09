@@ -1,9 +1,9 @@
-package com.example.mywork.services;
+package com.example.myworkbackend.services;
 
-import com.example.mywork.models.Account;
-import com.example.mywork.models.Day;
-import com.example.mywork.repositories.AccountRepository;
-import com.example.mywork.repositories.DayRepository;
+import com.example.myworkbackend.models.Account;
+import com.example.myworkbackend.models.Day;
+import com.example.myworkbackend.repositories.AccountRepository;
+import com.example.myworkbackend.repositories.DayRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.core.Local;

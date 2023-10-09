@@ -1,6 +1,6 @@
-package com.example.mywork.repositories;
+package com.example.myworkbackend.repositories;
 
-import com.example.mywork.models.Day;
+import com.example.myworkbackend.models.Day;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.LocalDate;
