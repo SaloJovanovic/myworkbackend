@@ -1,0 +1,56 @@
+package com.example.mywork.controlers;
+
+import com.example.mywork.models.Account;
+import com.example.mywork.models.AccountLogInCred;
+import com.example.mywork.services.AccountService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/account")
+public class AccountController {
+    private final AccountService accountService;
+
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    ResponseEntity<?> options() {
+        return ResponseEntity
+                .ok()
+                .allow(HttpMethod.GET, HttpMethod.POST, HttpMethod.DELETE)
+                .build();
+    }
+
+    @PostMapping("/create")
+    @CrossOrigin
+    public Account createAccount(@RequestBody Account accountInfo) {
+        return accountService.createAccount(accountInfo);
+    }
+
+    @PostMapping("/login")
+    @CrossOrigin
+    public AccountLogInCred accountLogInCreds(@RequestParam String username, @RequestParam String attemptedPassword) {
+        return accountService.accountLogInCreds(username, attemptedPassword);
+    }
+
+    @GetMapping("/get-token")
+    @CrossOrigin
+    public String getToken(@RequestParam String id) {
+        return accountService.getToken(id);
+    }
+
+    @GetMapping("/get-account")
+    @CrossOrigin
+    public Account getAccountById(@RequestParam String id) {
+        return accountService.getAccountById(id);
+    }
+
+    @PutMapping("/change-password")
+    @CrossOrigin
+    public boolean changePassword(@RequestParam String id, @RequestParam String oldPassword, @RequestParam String newPassword) {
+        return accountService.changePassword(id, oldPassword, newPassword);
+    }
+}
