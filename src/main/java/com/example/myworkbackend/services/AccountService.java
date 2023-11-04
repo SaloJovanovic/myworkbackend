@@ -79,4 +79,20 @@ public class AccountService {
             return false;
         }
     }
+
+    public Account changeUsername(String id, String newName) {
+        Account account = accountRepository.findById(id).orElse(null);
+
+        if (account != null) {
+            // Update the name and set Name to the lowercase version of newName
+            account.setUsername(newName.toLowerCase());
+            account.setName(newName);
+
+            // Save the updated account in the database
+            return accountRepository.save(account);
+        } else {
+            // Account not found
+            return null;
+        }
+    }
 }

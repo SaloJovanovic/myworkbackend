@@ -53,4 +53,10 @@ public class AccountController {
     public boolean changePassword(@RequestParam String id, @RequestParam String oldPassword, @RequestParam String newPassword) {
         return accountService.changePassword(id, oldPassword, newPassword);
     }
+
+    @PutMapping("/change-username")
+    @CrossOrigin
+    public Account changeUsername(@RequestParam String id, @RequestParam String newName) {
+        return accountService.changeUsername(id, newName);
+    }
 }
