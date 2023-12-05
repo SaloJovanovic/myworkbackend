@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Document
@@ -20,8 +21,8 @@ public class Day {
     @Indexed(unique = true) // Set unique to true to ensure date uniqueness
     private LocalDate date;
 
-    private String[] employeesIds;
-    private String[] employeesNames;
+    private List<String> employeesIds;
+    private List<String> employeesNames;
     private String[] shifts;
     private String[] startTimes;
     private String[] endTimes;

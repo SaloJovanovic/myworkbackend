@@ -1,5 +1,6 @@
 package com.example.myworkbackend.controlers;
 
+import com.example.myworkbackend.models.Account;
 import com.example.myworkbackend.models.Day;
 import com.example.myworkbackend.services.DayService;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,7 @@ public class DayController {
         return dayService.updateDay(date, newDay);
     }
 
+
     @PutMapping("/updateDayNote")
     @CrossOrigin
     public Day updateDayNote(@RequestParam LocalDate date, @RequestParam String newDayNote) {
@@ -68,15 +70,27 @@ public class DayController {
         return dayService.updateWeekNote(date, newWeekNote);
     }
 
-    @GetMapping("get-todays-date")
+    @GetMapping("/get-todays-date")
     @CrossOrigin
     public LocalDate getTodaysDate() {
         return dayService.getTodaysDate();
     }
 
-    @GetMapping("get-week")
+    @GetMapping("/get-week")
     @CrossOrigin
     public List<Day> getWeek(@RequestParam LocalDate inputDate) {
         return dayService.getWeek(inputDate);
+    }
+
+    @PutMapping("/changeStatus")
+    @CrossOrigin
+    public Account changeStatus(@RequestParam String accountId) {
+        return dayService.changeStatus(accountId);
+    }
+
+    @PutMapping("/updateWeek")
+    @CrossOrigin
+    public List<Day> updateWeek(@RequestParam LocalDate date) {
+        return dayService.updateWeek(date);
     }
 }

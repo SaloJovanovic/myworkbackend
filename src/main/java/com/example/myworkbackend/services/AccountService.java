@@ -2,6 +2,7 @@ package com.example.myworkbackend.services;
 
 import com.example.myworkbackend.models.Account;
 import com.example.myworkbackend.models.AccountLogInCred;
+import com.example.myworkbackend.models.Day;
 import com.example.myworkbackend.repositories.AccountRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.swing.text.html.Option;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -20,11 +24,17 @@ public class AccountService {
     private PasswordEncoder passwordEncoder;
 
     public Account createAccount(Account accountInfo) {
+        Optional<Account> existingAccount = accountRepository.findByUsername(accountInfo.getUsername());
+        if (existingAccount.isPresent()) {
+            // Username already exists, throw a FORBIDDEN exception
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Username already exists");
+        }
         Account account = Account.builder()
                 .name(accountInfo.getName())
                 .username(accountInfo.getUsername())
                 .password(passwordEncoder.encode(accountInfo.getPassword()))
                 .role(accountInfo.getRole())
+                .active(accountInfo.getActive())
                 .build();
         try { return accountRepository.save(account); }
         catch (DataIntegrityViolationException exception) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST); }

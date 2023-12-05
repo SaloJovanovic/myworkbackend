@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.awt.image.AreaAveragingScaleFilter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -28,20 +29,22 @@ public class DayService {
     private final DayRepository dayRepository;
     private final AccountRepository accountRepository;
 
-    public String[] getAllAccountsIds() {
+    public List<String> getAllAccountsIds() {
         List<Account> accounts = accountRepository.findAll();
-        String[] accountsIds = new String[accounts.size()];
+        List<String> accountsIds = new ArrayList<>();
         for (int i = 0; i < accounts.size(); i++) {
-            accountsIds[i] = accounts.get(i).getId();
+            if (accounts.get(i).getActive().equals(1))
+                accountsIds.add(accounts.get(i).getId());
         }
         return accountsIds;
     }
 
-    public String[] getAllAccountsNames() {
+    public List<String> getAllAccountsNames() {
         List<Account> accounts = accountRepository.findAll();
-        String[] accountsNames = new String[accounts.size()];
+        List<String> accountsNames = new ArrayList<>();
         for (int i = 0; i < accounts.size(); i++) {
-            accountsNames[i] = accounts.get(i).getName();
+            if (accounts.get(i).getActive().equals(1))
+                accountsNames.add(accounts.get(i).getName());
         }
         return accountsNames;
     }
@@ -77,16 +80,16 @@ public class DayService {
         for (LocalDate date = weekStartDate; !date.isAfter(weekEndDate); date = date.plusDays(1)) {
             Optional<Day> existingDay = dayRepository.findByDate(date);
             if (!existingDay.isPresent()) {
-                String[] employeeIds = getAllAccountsIds();
-                String[] employeeNames = getAllAccountsNames();
+                List<String> employeeIds = getAllAccountsIds();
+                List<String> employeeNames = getAllAccountsNames();
 
-                String[] emptyShifts = new String[employeeIds.length - 1];
+                String[] emptyShifts = new String[employeeIds.size() - 1];
                 Arrays.fill(emptyShifts, "0");
 
-                String[] emptyStartTimes = new String[employeeIds.length - 1];
+                String[] emptyStartTimes = new String[employeeIds.size() - 1];
                 Arrays.fill(emptyStartTimes, "0");
 
-                String[] emptyEndTimes = new String[employeeNames.length - 1];
+                String[] emptyEndTimes = new String[employeeNames.size() - 1];
                 Arrays.fill(emptyEndTimes, "0");
 
                 Day day = Day.builder()
@@ -109,6 +112,68 @@ public class DayService {
         }
 
         return weekDays;
+    }
+
+    @Transactional
+    public List<Day> updateWeek(LocalDate inputDate, String updatedAccountId) {
+        // Calculate the start and end dates for the entire week (Monday to Sunday)
+        LocalDate weekStartDate = inputDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate weekEndDate = inputDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
+        List<Day> updatedWeekDays = new ArrayList<>();
+
+        List<String> employeeIds = getAllAccountsIds();
+        List<String> employeeNames = getAllAccountsNames();
+
+        int updatedAccountNum = 0;
+
+        for (int i = 0; i < employeeIds.size(); i++) {
+            if (employeeNames.get(i).equals(updatedAccountId))
+                updatedAccountNum = i - 1;
+        }
+
+        for (LocalDate date = weekStartDate; !date.isAfter(weekEndDate); date = date.plusDays(1)) {
+            Optional<Day> existingDay = dayRepository.findByDate(date);
+
+            if (existingDay.isPresent()) {
+                // Update the existing day
+                Day dayToUpdate = existingDay.get();
+
+                // Perform other necessary updates based on your requirements
+
+                ArrayList<String> shifts = new ArrayList<>(Arrays.asList(dayToUpdate.getShifts()));
+                shifts.add(updatedAccountNum, "0");
+
+                ArrayList<String>  = new ArrayList<>(Arrays.asList(dayToUpdate.getShifts()));
+                shifts.add(updatedAccountNum, "0");
+
+                try {
+                    updatedWeekDays.add(dayRepository.save(dayToUpdate));
+                } catch (DataIntegrityViolationException exception) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                }
+            }
+        }
+
+        return updatedWeekDays;
+    }
+
+
+    public Account changeStatus(String id) {
+        Account account = accountRepository.findById(id).orElse(null);
+        if (account != null) {
+            if (account.getActive().equals(1))
+                account.setActive(0);
+            else
+                account.setActive(1);
+            accountRepository.save(account);
+            Day day = Day.builder()
+                    .date(getTodaysDate())
+                    .build();
+            createWeek(day);
+            return account;
+        }
+        return null;
     }
 
     public List<Day> getWeek(LocalDate inputDate) {
@@ -143,8 +208,8 @@ public class DayService {
             String[] shifts = day.getShifts();
             int r = -1;
 
-            for (int i = 1; i < day.getEmployeesIds().length; i++) {
-                if (day.getEmployeesIds()[i].equals(id)) {
+            for (int i = 1; i < day.getEmployeesIds().size(); i++) {
+                if (day.getEmployeesIds().get(i).equals(id)) {
                     r = i - 1;
                     break;
                 }
@@ -169,8 +234,8 @@ public class DayService {
             String[] endTimes = day.getEndTimes();
             int r = -1;
 
-            for (int i = 1; i < day.getEmployeesIds().length; i++) {
-                if (day.getEmployeesIds()[i].equals(id)) {
+            for (int i = 1; i < day.getEmployeesIds().size(); i++) {
+                if (day.getEmployeesIds().get(i).equals(id)) {
                     r = i - 1;
                     break;
                 }
