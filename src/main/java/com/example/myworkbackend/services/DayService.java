@@ -115,7 +115,7 @@ public class DayService {
     }
 
     @Transactional
-    public List<Day> updateWeek(LocalDate inputDate, String updatedAccountId) {
+    public List<Day> updateWeek(LocalDate inputDate, String updatedAccountId, int previousAccountNum) {
         // Calculate the start and end dates for the entire week (Monday to Sunday)
         LocalDate weekStartDate = inputDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEndDate = inputDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
@@ -124,11 +124,12 @@ public class DayService {
 
         List<String> employeeIds = getAllAccountsIds();
         List<String> employeeNames = getAllAccountsNames();
+        Account changedAccount = accountRepository.findById(updatedAccountId).get();
 
         int updatedAccountNum = 0;
 
         for (int i = 0; i < employeeIds.size(); i++) {
-            if (employeeNames.get(i).equals(updatedAccountId))
+            if (employeeIds.get(i).equals(updatedAccountId))
                 updatedAccountNum = i - 1;
         }
 
@@ -142,11 +143,43 @@ public class DayService {
                 // Perform other necessary updates based on your requirements
 
                 ArrayList<String> shifts = new ArrayList<>(Arrays.asList(dayToUpdate.getShifts()));
-                shifts.add(updatedAccountNum, "0");
+                ArrayList<String> startTimes = new ArrayList<>(Arrays.asList(dayToUpdate.getStartTimes()));
+                ArrayList<String> endTimes = new ArrayList<>(Arrays.asList(dayToUpdate.getEndTimes()));
+                if (changedAccount.getActive().equals(1)) {
 
-                ArrayList<String>  = new ArrayList<>(Arrays.asList(dayToUpdate.getShifts()));
-                shifts.add(updatedAccountNum, "0");
+                    shifts.add(updatedAccountNum, "0");
 
+                    startTimes.add(updatedAccountNum, "0");
+
+                    endTimes.add(updatedAccountNum, "0");
+
+                    dayToUpdate.setEmployeesIds(employeeIds);
+                    dayToUpdate.setEmployeesNames(employeeNames);
+                    dayToUpdate.setShifts(shifts.toArray(new String[0]));
+                    dayToUpdate.setStartTimes(startTimes.toArray(new String[0]));
+                    dayToUpdate.setEndTimes(endTimes.toArray(new String[0]));
+                }
+                else {
+                    String[] newShifts = new String[shifts.toArray().length - 1];
+                    String[] newStartTimes = new String[shifts.toArray().length - 1];
+                    String[] newEndTimes = new String[shifts.toArray().length - 1];
+                    if (previousAccountNum >= 0 && previousAccountNum < shifts.toArray().length) {
+                        int newArrayIndex = 0;
+                        for (int i = 0; i < shifts.toArray().length; i++) {
+                            if (i != previousAccountNum) {
+                                newShifts[newArrayIndex] = shifts.get(i);
+                                newStartTimes[newArrayIndex] = startTimes.get(i);
+                                newEndTimes[newArrayIndex] = endTimes.get(i);
+                                newArrayIndex++;
+                            }
+                        }
+                        dayToUpdate.setEmployeesIds(employeeIds);
+                        dayToUpdate.setEmployeesNames(employeeNames);
+                        dayToUpdate.setShifts(newShifts);
+                        dayToUpdate.setStartTimes(newStartTimes);
+                        dayToUpdate.setEndTimes(newEndTimes);
+                    }
+                }
                 try {
                     updatedWeekDays.add(dayRepository.save(dayToUpdate));
                 } catch (DataIntegrityViolationException exception) {
@@ -158,7 +191,6 @@ public class DayService {
         return updatedWeekDays;
     }
 
-
     public Account changeStatus(String id) {
         Account account = accountRepository.findById(id).orElse(null);
         if (account != null) {
@@ -167,14 +199,26 @@ public class DayService {
             else
                 account.setActive(1);
             accountRepository.save(account);
-            Day day = Day.builder()
-                    .date(getTodaysDate())
-                    .build();
-            createWeek(day);
+//            Day day = Day.builder()
+//                    .date(getTodaysDate())
+//                    .build();
+//            createWeek(day);
+            Day day = dayRepository.findByDate(getTodaysDate()).get();
+            List<String> employeeIds = day.getEmployeesIds();
+            int updatedAccountNum = 0;
+            for (int i = 0; i < employeeIds.size(); i++) {
+                if (employeeIds.get(i).equals(account.getId()))
+                    updatedAccountNum = i - 1;
+            }
+            updateWeek(getTodaysDate(), account.getId(), updatedAccountNum);
+            LocalDate nextWeekDate = getTodaysDate().plusWeeks(1);
+            if (dayRepository.findByDate(nextWeekDate) != null)
+                updateWeek(nextWeekDate, account.getId(), updatedAccountNum);
             return account;
         }
         return null;
     }
+
 
     public List<Day> getWeek(LocalDate inputDate) {
         List<Day> weekDays = new ArrayList<>();

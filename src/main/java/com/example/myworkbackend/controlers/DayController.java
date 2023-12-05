@@ -88,9 +88,9 @@ public class DayController {
         return dayService.changeStatus(accountId);
     }
 
-    @PutMapping("/updateWeek")
-    @CrossOrigin
-    public List<Day> updateWeek(@RequestParam LocalDate date) {
-        return dayService.updateWeek(date);
-    }
+//    @PutMapping("/updateWeek")
+//    @CrossOrigin
+//    public List<Day> updateWeek(@RequestParam LocalDate date, String accountId) {
+//        return dayService.updateWeek(date, accountId);
+//    }
 }
