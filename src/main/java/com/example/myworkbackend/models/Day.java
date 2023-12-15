@@ -26,6 +26,7 @@ public class Day {
     private String[] shifts;
     private String[] startTimes;
     private String[] endTimes;
+    private Double[] hourlyRates;
     private String weekNote;
     private String dayNote;
 }

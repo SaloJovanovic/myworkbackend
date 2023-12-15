@@ -59,4 +59,10 @@ public class AccountController {
     public Account changeUsername(@RequestParam String id, @RequestParam String newName) {
         return accountService.changeUsername(id, newName);
     }
+
+    @PutMapping("/changeHourlyRate")
+    @CrossOrigin
+    public Account changeHourlyRate(@RequestParam String id, @RequestParam Double newHourlyRate) {
+        return  accountService.changeHourlyRate(id, newHourlyRate);
+    }
 }

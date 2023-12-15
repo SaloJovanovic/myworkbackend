@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.awt.image.AreaAveragingScaleFilter;
+import java.lang.reflect.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -89,6 +90,11 @@ public class DayService {
                 String[] emptyStartTimes = new String[employeeIds.size() - 1];
                 Arrays.fill(emptyStartTimes, "0");
 
+                Double[] hourlyRates = new Double[employeeIds.size() - 1];
+                for (int i = 0; i < hourlyRates.length; i++) {
+                    hourlyRates[i] = accountRepository.findById(employeeIds.get(i+1)).get().getHourlyRate();
+                }
+
                 String[] emptyEndTimes = new String[employeeNames.size() - 1];
                 Arrays.fill(emptyEndTimes, "0");
 
@@ -98,6 +104,7 @@ public class DayService {
                         .employeesNames(employeeNames)
                         .shifts(emptyShifts)
                         .startTimes(emptyStartTimes)
+                        .hourlyRates(hourlyRates)
                         .endTimes(emptyEndTimes)
                         .weekNote("")
                         .dayNote("")
@@ -112,6 +119,21 @@ public class DayService {
         }
 
         return weekDays;
+    }
+
+    public void updateHourlyRates() {
+        List<Day> daysToUpdate = dayRepository.findByDateGreaterThanEqual(getTodaysDate());
+
+        for (Day currentDay : daysToUpdate) {
+            Double[] hourlyRates = currentDay.getHourlyRates();
+            Double[] newHourlyRates = new Double[hourlyRates.length];
+            List<String> employeeIds = currentDay.getEmployeesIds();
+            for (int i = 0; i < hourlyRates.length; i++) {
+                newHourlyRates[i] = accountRepository.findById(employeeIds.get(i+1)).get().getHourlyRate();
+            }
+            currentDay.setHourlyRates(newHourlyRates);
+            dayRepository.save(currentDay);
+        }
     }
 
     @Transactional
@@ -144,10 +166,14 @@ public class DayService {
 
                 ArrayList<String> shifts = new ArrayList<>(Arrays.asList(dayToUpdate.getShifts()));
                 ArrayList<String> startTimes = new ArrayList<>(Arrays.asList(dayToUpdate.getStartTimes()));
+                ArrayList<Double> hourlyRates = new ArrayList<>(Arrays.asList(dayToUpdate.getHourlyRates()));
                 ArrayList<String> endTimes = new ArrayList<>(Arrays.asList(dayToUpdate.getEndTimes()));
                 if (changedAccount.getActive().equals(1)) {
 
                     shifts.add(updatedAccountNum, "0");
+
+                    double hourlyRate = accountRepository.findById(updatedAccountId).get().getHourlyRate();
+                    hourlyRates.add(updatedAccountNum, hourlyRate);
 
                     startTimes.add(updatedAccountNum, "0");
 
@@ -157,11 +183,13 @@ public class DayService {
                     dayToUpdate.setEmployeesNames(employeeNames);
                     dayToUpdate.setShifts(shifts.toArray(new String[0]));
                     dayToUpdate.setStartTimes(startTimes.toArray(new String[0]));
+                    dayToUpdate.setHourlyRates(hourlyRates.toArray(new Double[0]));
                     dayToUpdate.setEndTimes(endTimes.toArray(new String[0]));
                 }
                 else {
                     String[] newShifts = new String[shifts.toArray().length - 1];
                     String[] newStartTimes = new String[shifts.toArray().length - 1];
+                    Double[] newHourlyRates = new Double[shifts.toArray().length - 1];
                     String[] newEndTimes = new String[shifts.toArray().length - 1];
                     if (previousAccountNum >= 0 && previousAccountNum < shifts.toArray().length) {
                         int newArrayIndex = 0;
@@ -169,6 +197,7 @@ public class DayService {
                             if (i != previousAccountNum) {
                                 newShifts[newArrayIndex] = shifts.get(i);
                                 newStartTimes[newArrayIndex] = startTimes.get(i);
+                                newHourlyRates[newArrayIndex] = hourlyRates.get(i);
                                 newEndTimes[newArrayIndex] = endTimes.get(i);
                                 newArrayIndex++;
                             }
@@ -177,6 +206,7 @@ public class DayService {
                         dayToUpdate.setEmployeesNames(employeeNames);
                         dayToUpdate.setShifts(newShifts);
                         dayToUpdate.setStartTimes(newStartTimes);
+                        dayToUpdate.setHourlyRates(newHourlyRates);
                         dayToUpdate.setEndTimes(newEndTimes);
                     }
                 }

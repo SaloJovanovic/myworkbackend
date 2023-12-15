@@ -22,6 +22,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     private PasswordEncoder passwordEncoder;
+    private final DayService dayService;
 
     public Account createAccount(Account accountInfo) {
         Optional<Account> existingAccount = accountRepository.findByUsername(accountInfo.getUsername());
@@ -34,9 +35,14 @@ public class AccountService {
                 .username(accountInfo.getUsername())
                 .password(passwordEncoder.encode(accountInfo.getPassword()))
                 .role(accountInfo.getRole())
-                .active(accountInfo.getActive())
+                .active(0)
+                .hourlyRate(accountInfo.getHourlyRate())
                 .build();
-        try { return accountRepository.save(account); }
+        try {
+            accountRepository.save(account);
+            dayService.changeStatus(accountRepository.findByUsername(accountInfo.getUsername()).get().getId());
+            return account;
+        }
         catch (DataIntegrityViolationException exception) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST); }
     }
 
@@ -97,11 +103,23 @@ public class AccountService {
             // Update the name and set Name to the lowercase version of newName
             account.setUsername(newName.toLowerCase());
             account.setName(newName);
-
             // Save the updated account in the database
             return accountRepository.save(account);
         } else {
             // Account not found
+            return null;
+        }
+    }
+
+    public Account changeHourlyRate(String id, Double newHourlyRate) {
+        Account account = accountRepository.findById(id).orElse(null);
+
+        if (account != null) {
+            account.setHourlyRate(newHourlyRate);
+            accountRepository.save(account);
+            dayService.updateHourlyRates();
+            return account;
+        } else {
             return null;
         }
     }

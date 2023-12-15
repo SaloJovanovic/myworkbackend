@@ -8,13 +8,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document
 @Builder
-public class Account {
-    @Id
-    private String id;
+public class AccountSalary {
+    private String accountId;
     private String name;
     private String username;
-    private String password;
     private String role;
     private Double hourlyRate;
     private Integer active;
+    private Double salary;
 }

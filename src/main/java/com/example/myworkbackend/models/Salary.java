@@ -5,16 +5,15 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+
 @Data
 @Document
 @Builder
-public class Account {
+public class Salary {
     @Id
     private String id;
-    private String name;
-    private String username;
-    private String password;
-    private String role;
-    private Double hourlyRate;
-    private Integer active;
+    private LocalDate date;
+    private String accountId;
+    private Double salary;
 }

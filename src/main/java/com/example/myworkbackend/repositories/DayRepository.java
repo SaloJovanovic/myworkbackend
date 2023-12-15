@@ -12,4 +12,5 @@ public interface DayRepository extends MongoRepository<Day, String> {
     Optional<Day> findByDate(LocalDate date);
 
     List<Day> findByDateBetween(LocalDate weekStartDate, LocalDate weekEndDate);
+    List<Day> findByDateGreaterThanEqual(LocalDate inputDate);
 }
