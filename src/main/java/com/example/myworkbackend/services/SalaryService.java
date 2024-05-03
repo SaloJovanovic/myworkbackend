@@ -113,7 +113,7 @@ public class SalaryService {
 
 //                System.out.println(employeeIds + "\n" + hourlyRates + "\n" + startTimes + "\n" + endTimes + "\n" + day);
 
-                for (int i = 0; i < employeeIds.size(); i++) {
+                for (int i = 1; i < employeeIds.size(); i++) {
                     System.out.println(employeeIds.get(i) + " " + accountId + "\n");
                     if (employeeIds.get(i).equals(accountId)) {
                         double hourlyRate = hourlyRates[i-1];
