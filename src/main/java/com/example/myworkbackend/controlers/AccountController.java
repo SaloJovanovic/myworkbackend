@@ -65,4 +65,10 @@ public class AccountController {
     public Account changeHourlyRate(@RequestParam String id, @RequestParam Double newHourlyRate) {
         return  accountService.changeHourlyRate(id, newHourlyRate);
     }
+
+    @PutMapping("/change-fixedSalary")
+    @CrossOrigin
+    public Account changeFixedSalary(@RequestParam String id, @RequestParam Double newFixedSalary) {
+        return accountService.changeFixedSalary(id, newFixedSalary);
+    }
 }

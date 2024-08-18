@@ -6,6 +6,7 @@ import com.example.myworkbackend.repositories.AccountRepository;
 import com.example.myworkbackend.repositories.DayRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.codecs.jsr310.LocalDateCodec;
 import org.springframework.cglib.core.Local;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -72,6 +73,7 @@ public class DayService {
         // Check for existing days first
         for (LocalDate date = weekStartDate; !date.isAfter(weekEndDate); date = date.plusDays(1)) {
             Optional<Day> existingDay = dayRepository.findByDate(date);
+            System.out.println("Postoji " + existingDay);
             if (existingDay.isPresent()) {
                 weekDays.add(existingDay.get());
             }
@@ -122,7 +124,7 @@ public class DayService {
     }
 
     public void updateHourlyRates() {
-        List<Day> daysToUpdate = dayRepository.findByDateGreaterThanEqual(getTodaysDate());
+        List<Day> daysToUpdate = dayRepository.findByDateGreaterThanEqual(LocalDate.now());
 
         for (Day currentDay : daysToUpdate) {
             Double[] hourlyRates = currentDay.getHourlyRates();
@@ -233,15 +235,24 @@ public class DayService {
 //                    .date(getTodaysDate())
 //                    .build();
 //            createWeek(day);
-            Day day = dayRepository.findByDate(getTodaysDate()).get();
-            List<String> employeeIds = day.getEmployeesIds();
+            System.out.println("Danasnji dan: ----- " + getTodaysDate());
+            LocalDate danasnjiDan = getTodaysDate();
+            System.out.println(dayRepository.findByDate(getTodaysDate()));
+            System.out.println(dayRepository.findAll());
+            String danstr = "2024-08-18";
+            LocalDate dann = LocalDate.now();
+//            Optional<Day> day = dayRepository.findByDate(danasnjiDan).get();
+            Optional<Day> day = dayRepository.findByDate(LocalDate.now());
+            System.out.println("Ovaj dan: ");
+            System.out.println(day);
+            List<String> employeeIds = day.get().getEmployeesIds();
             int updatedAccountNum = 0;
             for (int i = 0; i < employeeIds.size(); i++) {
                 if (employeeIds.get(i).equals(account.getId()))
                     updatedAccountNum = i - 1;
             }
-            updateWeek(getTodaysDate(), account.getId(), updatedAccountNum);
-            LocalDate nextWeekDate = getTodaysDate().plusWeeks(1);
+            updateWeek(LocalDate.now(), account.getId(), updatedAccountNum);
+            LocalDate nextWeekDate = LocalDate.now().plusWeeks(1);
             if (dayRepository.findByDate(nextWeekDate) != null)
                 updateWeek(nextWeekDate, account.getId(), updatedAccountNum);
             return account;

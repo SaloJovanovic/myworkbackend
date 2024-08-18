@@ -35,7 +35,7 @@ public class AccountService {
                 .username(accountInfo.getUsername())
                 .password(passwordEncoder.encode(accountInfo.getPassword()))
                 .role(accountInfo.getRole())
-                .active(1)
+                .active(0)
                 .hourlyRate(accountInfo.getHourlyRate())
                 .fixedSalary(accountInfo.getFixedSalary())
                 .build();
@@ -119,6 +119,18 @@ public class AccountService {
             account.setHourlyRate(newHourlyRate);
             accountRepository.save(account);
             dayService.updateHourlyRates();
+            return account;
+        } else {
+            return null;
+        }
+    }
+
+    public Account changeFixedSalary(String id, Double newFixedSalary) {
+        Account account = accountRepository.findById(id).orElse(null);
+
+        if (account != null) {
+            account.setFixedSalary(newFixedSalary);
+            accountRepository.save(account);
             return account;
         } else {
             return null;

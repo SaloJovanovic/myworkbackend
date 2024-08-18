@@ -32,6 +32,25 @@ public class SalaryService {
         List<Account> accounts = accountRepository.findAll();
         List<Salary> salaries = new ArrayList<>();
 
+        System.out.println("QWERQWERQWERQWER - " + date.plusMonths(1).withDayOfMonth(1).plusDays(1));
+
+        if (LocalDate.now().isBefore(date.plusMonths(1).withDayOfMonth(1).plusDays(1))) {
+            for (Account account : accounts) {
+                Salary salary = createOrUpdateSalary(date, account.getId());
+                salaries.add(salary);
+            }
+        }
+        else {
+            salaries = getAllSalariesForMonth(date);
+        }
+
+        return salaries;
+    }
+
+    public List<Salary> createOrUpdateAllSalariesInCase(LocalDate date) {
+        List<Account> accounts = accountRepository.findAll();
+        List<Salary> salaries = new ArrayList<>();
+
         for (Account account : accounts) {
             Salary salary = createOrUpdateSalary(date, account.getId());
             salaries.add(salary);
@@ -66,6 +85,8 @@ public class SalaryService {
                     .username(account.getUsername())
                     .role(account.getRole())
                     .active(account.getActive())
+                    .hourlyRate(account.getHourlyRate())
+                    .fixedSalary(account.getFixedSalary())
                     .build();
             return salaryRepository.save(newSalary);
         }

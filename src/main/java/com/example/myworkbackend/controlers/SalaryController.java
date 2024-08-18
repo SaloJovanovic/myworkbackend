@@ -36,6 +36,12 @@ public class SalaryController {
         return salaryService.createOrUpdateAllSalaries(date);
     }
 
+    @PostMapping("/inCase")
+    @CrossOrigin
+    public List<Salary> inCase(@RequestParam LocalDate date) {
+        return salaryService.createOrUpdateAllSalariesInCase(date);
+    }
+
     @GetMapping("/get")
     @CrossOrigin
     public List<Salary> getAllSalariesForMonth(@RequestParam LocalDate date) {

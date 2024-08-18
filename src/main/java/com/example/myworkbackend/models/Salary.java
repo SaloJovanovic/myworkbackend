@@ -20,4 +20,6 @@ public class Salary {
     private String username;
     private String role;
     private Integer active;
+    private Double hourlyRate;
+    private Double fixedSalary;
 }
