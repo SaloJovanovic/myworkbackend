@@ -16,5 +16,6 @@ public class Account {
     private String password;
     private String role;
     private Double hourlyRate;
+    private Double fixedSalary;
     private Integer active;
 }

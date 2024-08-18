@@ -35,8 +35,9 @@ public class AccountService {
                 .username(accountInfo.getUsername())
                 .password(passwordEncoder.encode(accountInfo.getPassword()))
                 .role(accountInfo.getRole())
-                .active(0)
+                .active(1)
                 .hourlyRate(accountInfo.getHourlyRate())
+                .fixedSalary(accountInfo.getFixedSalary())
                 .build();
         try {
             accountRepository.save(account);

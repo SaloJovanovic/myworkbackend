@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,152 +30,153 @@ public class SalaryService {
 
     public List<Salary> createOrUpdateAllSalaries(LocalDate date) {
         List<Account> accounts = accountRepository.findAll();
-
-        // Now 'accounts' contains all Account entities, and you can extract IDs as needed.
-//        List<String> accountIds = accounts.stream()
-//                .map(Account::getId)
-//                .collect(Collectors.toList());
-
         List<Salary> salaries = new ArrayList<>();
 
-        for (int i = 1; i < accounts.size(); i++) {
-            System.out.println(i + " - " + accounts.get(i));
-            salaries.add(createOrUpdateSalary(date, accounts.get(i).getId()));
+        for (Account account : accounts) {
+            Salary salary = createOrUpdateSalary(date, account.getId());
+            salaries.add(salary);
         }
 
         return salaries;
     }
 
     public Salary createOrUpdateSalary(LocalDate date, String accountId) {
-        // Check if a salary entry for the given month and accountId already exists
-        System.out.println("11111111111111111111111111\n");
-
         List<Salary> existingSalaries = salaryRepository.findAllByAccountId(accountId);
-
-        System.out.println("22222222222222222222222222\n");
-
-        // Filter salaries for the given month
         List<Salary> salariesForMonth = existingSalaries.stream()
                 .filter(salary -> salary.getDate().getMonth() == date.getMonth())
                 .toList();
-        System.out.println("33333333333333333333333333\n");
+
+        Account account = accountRepository.findById(accountId).orElse(null);
+        System.out.println("??????????????????????????????? " + account.getUsername() + " " + account.getRole());
 
         if (!salariesForMonth.isEmpty()) {
-            // Update existing salary entries
-//            for (Salary existingSalary : salariesForMonth) {
-            double updatedSalaryValue = calculateTotalSalary(salariesForMonth.get(0).getDate(), accountId);
-            salariesForMonth.get(0).setSalary(updatedSalaryValue);
-            return salaryRepository.save(salariesForMonth.get(0));
-//            }
+            Salary existingSalary = salariesForMonth.get(0);
+            double updatedSalaryValue = calculateTotalSalary(date, accountId);
+            existingSalary.setSalary(updatedSalaryValue);
+            return salaryRepository.save(existingSalary);
         } else {
-            // No existing salary entry found for the month, create a new one
-            System.out.println("44444444444444444444444444\n");
-
             double totalSalaryValue = calculateTotalSalary(date, accountId);
-            System.out.println("55555555555555555555555555\n");
-
-            // Create the Salary object and save it
-            Salary salary = Salary.builder()
+            assert account != null;
+            System.out.println("################################ " + account.getUsername() + " " + account.getRole());
+            Salary newSalary = Salary.builder()
                     .date(date)
                     .accountId(accountId)
                     .salary(totalSalaryValue)
+                    .name(account.getName())
+                    .username(account.getUsername())
+                    .role(account.getRole())
+                    .active(account.getActive())
                     .build();
-            System.out.println("66666666666666666666666666\n");
-
-            return salaryRepository.save(salary);
+            return salaryRepository.save(newSalary);
         }
-
-        // You can return a meaningful result here if needed
     }
 
     private double calculateTotalSalary(LocalDate date, String accountId) {
         double totalSalaryValue = 0.0;
 
-        // Assuming you have a method to retrieve all days in the given month
         List<Day> daysInMonth = dayRepository.findByDateBetween(
                 date.withDayOfMonth(1),
                 date.withDayOfMonth(date.lengthOfMonth())
         );
 
-        // Assuming you have a method to retrieve the account details by accountId
         Account account = accountRepository.findById(accountId).orElse(null);
 
         if (account != null) {
+            System.out.println("Osoba: " + account.getUsername());
+            Double fixedSalary = account.getFixedSalary();
+
             for (Day day : daysInMonth) {
-                // Assuming employeesIds list contains the IDs of employees who worked on that day
                 List<String> employeeIds = day.getEmployeesIds();
-                Double[] hourlyRates = day.getHourlyRates();
-                String[] startTimes = day.getStartTimes();
-                String[] endTimes = day.getEndTimes();
-
-                for (int i = 0; i < hourlyRates.length; i++) {
-                    System.out.print(hourlyRates[i] + " " + startTimes[i] + " " + endTimes[i] + "\n");
-                }
-
-//                System.out.println(employeeIds + "\n" + hourlyRates + "\n" + startTimes + "\n" + endTimes + "\n" + day);
+                List<Double> hourlyRates = day.getHourlyRates() != null ? List.of(day.getHourlyRates()) : new ArrayList<>();
+                List<String> startTimes = day.getStartTimes() != null ? List.of(day.getStartTimes()) : new ArrayList<>();
+                List<String> endTimes = day.getEndTimes() != null ? List.of(day.getEndTimes()) : new ArrayList<>();
+                List<String> shifts = day.getShifts() != null ? List.of(day.getShifts()) : new ArrayList<>();
 
                 for (int i = 1; i < employeeIds.size(); i++) {
-                    System.out.println(employeeIds.get(i) + " " + accountId + "\n");
                     if (employeeIds.get(i).equals(accountId)) {
-                        double hourlyRate = hourlyRates[i-1];
-                        String startTime = startTimes[i-1];
-                        String endTime = endTimes[i-1];
-                        System.out.println("asdfasdfasdfasdf " + startTime + " " + endTime);
-
-                        if (!startTime.equals(endTime)) {
-                            System.out.println("qwerqwerqwer");
-                            totalSalaryValue += calculateDailySalary(startTime, endTime, hourlyRate);
-                        }
+                        System.out.println(day.getDate());
+                        double dailySalary = calculateDailySalary(startTimes.get(i-1), endTimes.get(i-1), hourlyRates.get(i-1), shifts.get(i-1), fixedSalary);
+//                        double dailySalary = calculateDailySalary(
+//                                i < startTimes.size() ? startTimes.get(i-1) : null,
+//                                i < endTimes.size() ? endTimes.get(i-1) : null,
+//                                i < hourlyRates.size() ? hourlyRates.get(i-1) : 0.0,
+//                                i < shifts.size() ? shifts.get(i-1) : null,
+//                                fixedSalary
+//                        );
+                        totalSalaryValue += dailySalary;
                     }
                 }
+            }
+
+            if (fixedSalary != null && fixedSalary > 0) {
+                totalSalaryValue += fixedSalary;
             }
         } else {
             log.error("Account with ID {} not found.", accountId);
         }
 
+        System.out.println("NALOG: " + accountRepository.findById(accountId).get().getUsername() + " - " + totalSalaryValue);
+
         return totalSalaryValue;
     }
 
-    private double calculateDailySalary(String startTime, String endTime, double hourlyRate) {
-        LocalTime start = LocalTime.parse(startTime);
-        LocalTime end = LocalTime.parse(endTime);
 
-        // Calculate the duration between start and end times
-        Duration duration = Duration.between(start, end);
 
-        // Calculate total hours worked
-        double totalHours = duration.toMinutes() / 60.0;
+    private double calculateDailySalary(String startTime, String endTime, double hourlyRate, String shift, Double fixedSalary) {
+        double totalHours = 0;
 
-        // Multiply total hours by hourly rate to get the total salary
-        return totalHours * hourlyRate;
-    }
+        try {
+            if (startTime != null && !startTime.equals("0") && endTime != null && !endTime.equals("0")) {
+                LocalTime start = LocalTime.parse(startTime);
+                LocalTime end = LocalTime.parse(endTime);
 
-    public List<AccountSalary> getAllSalariesForMonth(LocalDate inputDate) {
-        LocalDate startDate = inputDate.withDayOfMonth(1);
-        LocalDate endDate = inputDate.withDayOfMonth(inputDate.lengthOfMonth());
+                // Ako je endTime manje od startTime, dodaj 24 sata na endTime
+                if (end.isBefore(start)) {
+                    end = end.plusHours(24);
+                }
 
-        // Fetch all salaries for the specified month
-        List<Salary> allSalaries = salaryRepository.findByDateBetween(startDate, endDate);
+                double hoursDif = 0;
+                if (end.getHour() <= start.getHour()) {
+                    hoursDif = (end.getHour()+24) - start.getHour();
+                }
+                else {
+                    hoursDif = end.getHour() - start.getHour();
+                }
+                hoursDif *= 60;
+                double minsDif = end.getMinute() - start.getMinute();
+                hoursDif += minsDif;
 
-        List<AccountSalary> accountSalaries = new ArrayList<>();
+                // Izračunaj trajanje između start i end vremena
+                Duration duration = Duration.between(start, end);
 
-        for (Salary salary : allSalaries) {
-            Account account = accountRepository.findById(salary.getAccountId()).orElse(null);
-            if (account != null) {
-                AccountSalary accountSalary = AccountSalary.builder()
-                        .username(account.getUsername())
-                        .accountId(salary.getAccountId())
-                        .role(account.getRole())
-                        .name(account.getName())
-                        .username(account.getUsername())
-                        .hourlyRate(account.getHourlyRate())
-                        .active(account.getActive())
-                        .salary(salary.getSalary())
-                        .build();
-                accountSalaries.add(accountSalary);
+                // Izračunaj ukupan broj radnih sati
+                totalHours = hoursDif / 60.0;
+                if (totalHours > 15)
+                    return 0;
+                System.out.println("    broj sati: " + start + " - " + end + "; " + totalHours);
+            } else {
+                log.warn("Invalid startTime or endTime: startTime={}, endTime={}", startTime, endTime);
             }
+        } catch (Exception e) {
+            log.error("Error parsing time: " + e.getMessage());
         }
 
-        return accountSalaries;
+        // Izračunaj platu na osnovu smene
+        if ("O".equals(shift)) {
+            if (fixedSalary == null || fixedSalary <= 0) {
+                return totalHours * hourlyRate * 0.6;
+            } else {
+                return -fixedSalary / 26 * 0.6;
+            }
+        } else {
+            return totalHours * hourlyRate;
+        }
+    }
+
+
+    public List<Salary> getAllSalariesForMonth(LocalDate inputDate) {
+        LocalDate startDate = inputDate.withDayOfMonth(1);
+        LocalDate endDate = inputDate.withDayOfMonth(inputDate.lengthOfMonth());
+        return salaryRepository.findByDateBetween(startDate, endDate);
     }
 }

@@ -16,4 +16,8 @@ public class Salary {
     private LocalDate date;
     private String accountId;
     private Double salary;
+    private String name;
+    private String username;
+    private String role;
+    private Integer active;
 }

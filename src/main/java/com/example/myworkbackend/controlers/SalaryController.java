@@ -1,11 +1,8 @@
 package com.example.myworkbackend.controlers;
 
-import com.example.myworkbackend.models.AccountSalary;
-import com.example.myworkbackend.models.Day;
 import com.example.myworkbackend.models.Salary;
 import com.example.myworkbackend.services.SalaryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +38,7 @@ public class SalaryController {
 
     @GetMapping("/get")
     @CrossOrigin
-    public List<AccountSalary> getAllSalariesForMonth(@RequestParam LocalDate date) {
+    public List<Salary> getAllSalariesForMonth(@RequestParam LocalDate date) {
         return salaryService.getAllSalariesForMonth(date);
     }
 }
