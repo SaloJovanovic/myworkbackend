@@ -223,6 +223,15 @@ public class DayService {
         return updatedWeekDays;
     }
 
+    public Day findByDateHandmade(LocalDate inputDate) {
+        List<Day> days = dayRepository.findAll();
+        for (Day day : days) {
+            if (day.getDate().equals(inputDate))
+                return day;
+        }
+        return null;
+    }
+
     public Account changeStatus(String id) {
         Account account = accountRepository.findById(id).orElse(null);
         if (account != null) {
@@ -242,10 +251,10 @@ public class DayService {
             String danstr = "2024-08-18";
             LocalDate dann = LocalDate.now();
 //            Optional<Day> day = dayRepository.findByDate(danasnjiDan).get();
-            Optional<Day> day = dayRepository.findByDate(LocalDate.now());
+            Day day = findByDateHandmade(LocalDate.now());
             System.out.println("Ovaj dan: ");
             System.out.println(day);
-            List<String> employeeIds = day.get().getEmployeesIds();
+            List<String> employeeIds = day.getEmployeesIds();
             int updatedAccountNum = 0;
             for (int i = 0; i < employeeIds.size(); i++) {
                 if (employeeIds.get(i).equals(account.getId()))

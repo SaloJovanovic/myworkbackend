@@ -95,10 +95,14 @@ public class SalaryService {
     private double calculateTotalSalary(LocalDate date, String accountId) {
         double totalSalaryValue = 0.0;
 
+        System.out.println("Duzina dana: " + dayRepository.findByDate(date.withDayOfMonth(date.lengthOfMonth())));
+
         List<Day> daysInMonth = dayRepository.findByDateBetween(
                 date.withDayOfMonth(1),
-                date.withDayOfMonth(date.lengthOfMonth())
+                date.withDayOfMonth(date.lengthOfMonth()).plusDays(1)
         );
+
+        System.out.println("Svi dani u mesecu: " + daysInMonth);
 
         Account account = accountRepository.findById(accountId).orElse(null);
 
